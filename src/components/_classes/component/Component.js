@@ -2385,6 +2385,8 @@ export default class Component extends Element {
       row: row || this.data
     }, 'value');
     if (calculatedValue === undefined || calculatedValue === null) calculatedValue = this.emptyValue;
+    // nathaniel was here
+    if (calculatedValue === 12) debugger;
 
     // reassigning calculated value to the right one if rows(for ex. dataGrid rows) were reordered
     if (flags.isReordered && allowOverride) {
@@ -2574,7 +2576,7 @@ export default class Component extends Element {
     if (flags.noCheck) {
       return true;
     }
-    this.calculateComponentValue(data, flags, row);
+    const calcChanged = this.calculateComponentValue(data, flags, row);
     this.checkComponentConditions(data, flags, row);
     if (flags.noValidate) {
       return true;
@@ -2582,10 +2584,16 @@ export default class Component extends Element {
 
     // We need to perform a test to see if they provided a default value that is not valid and immediately show
     // an error if that is the case.
-    let isDirty = !this.builderMode &&
+    let isDirty =  (!this.builderMode &&
       !this.options.preview &&
       !this.isEmpty(this.defaultValue) &&
-      this.isEqual(this.defaultValue, this.dataValue);
+      this.isEqual(this.defaultValue, this.dataValue));
+
+    // Bad workaround: always validate fields calculated values, no matter what.
+    if (this.calculatedValue !== undefined && !(Number.isNaN(this.calculatedValue) && !calcChanged)) {
+      // debugger;
+      isDirty = true;
+    }
 
     // We need to set dirty if they explicitly set noValidate to false.
     if (this.options.alwaysDirty || flags.dirty) {

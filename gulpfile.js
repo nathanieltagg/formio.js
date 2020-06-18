@@ -20,7 +20,10 @@ gulp.task('clean', require('del').bind(null, ['dist', 'lib']));
 // ESLint
 gulp.task('eslint', function eslintTask() {
   return gulp.src(['./src/**/*.js', '!./src/**/*.spec.js'])
-    .pipe(eslint())
+    .pipe(eslint({
+        rules: {
+            'no-debugger': 0,
+        }}))
     .pipe(eslint.format())
     .pipe(eslint.failAfterError());
 });
