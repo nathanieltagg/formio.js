@@ -2379,14 +2379,15 @@ export default class Component extends Element {
     }
 
     // Calculate the new value.
-    var calculatedValue = this.evaluate(this.component.calculateValue, {
+    let calculatedValue = this.evaluate(this.component.calculateValue, {
       value: dataValue,
       data,
       row: row || this.data
     }, 'value');
-    if (calculatedValue === undefined || calculatedValue === null) calculatedValue = this.emptyValue;
-    // nathaniel was here
-    if (calculatedValue === 12) debugger;
+
+    if (_.isNil(calculatedValue)) {
+      calculatedValue = this.emptyValue;
+    }
 
     // reassigning calculated value to the right one if rows(for ex. dataGrid rows) were reordered
     if (flags.isReordered && allowOverride) {
@@ -2578,18 +2579,19 @@ export default class Component extends Element {
     }
     const calcChanged = this.calculateComponentValue(data, flags, row);
     this.checkComponentConditions(data, flags, row);
-    if (flags.noValidate) {
+    if (flags.noValidate && !flags.validateOnInit) {
       return true;
     }
 
     // We need to perform a test to see if they provided a default value that is not valid and immediately show
     // an error if that is the case.
-    let isDirty =  (!this.builderMode &&
+    let isDirty = !this.builderMode &&
       !this.options.preview &&
       !this.isEmpty(this.defaultValue) &&
-      this.isEqual(this.defaultValue, this.dataValue));
+      this.isEqual(this.defaultValue, this.dataValue);
 
-    // Bad workaround: always validate fields calculated values, no matter what.
+    // We want to always validate calculated values...
+    //  .. unless they haven't recently changed, and are NaN, which is frequently the case when the form is empty.
     if (this.calculatedValue !== undefined && !(Number.isNaN(this.calculatedValue) && !calcChanged)) {
       // debugger;
       isDirty = true;
